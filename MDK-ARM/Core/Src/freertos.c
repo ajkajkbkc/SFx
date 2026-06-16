@@ -25,7 +25,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "queue.h"
+#include <string.h>
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,7 +47,11 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-
+extern volatile bsp_uart_status_info_st gtv_UartPortStatus[MAX_SUPPORT_UART_PORT];
+/* uart recevie buffer */
+uint8_t gcv_Uart1RecvBuf[RX_LEN_UART1];
+uint8_t gcv_Uart2RecvBuf[RX_LEN_UART2];
+uint8_t gcv_Uart3RecvBuf[RX_LEN_UART3];
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -60,11 +66,6 @@ const osThreadAttr_t UartTask_attributes = {
   .name = "UartTask",
   .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal,
-};
-/* Definitions for UartQueue */
-osMessageQueueId_t UartQueueHandle;
-const osMessageQueueAttr_t UartQueue_attributes = {
-  .name = "UartQueue"
 };
 /* Definitions for UartTimer1 */
 osTimerId_t UartTimer1Handle;
@@ -84,7 +85,7 @@ const osTimerAttr_t UartTimer3_attributes = {
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-
+QueueHandle_t gtv_UartTaskMsgQueueHandle;
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
@@ -125,12 +126,8 @@ void MX_FREERTOS_Init(void) {
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
-  /* Create the queue(s) */
-  /* creation of UartQueue */
-  UartQueueHandle = osMessageQueueNew (10, sizeof(uint16_t), &UartQueue_attributes);
-
   /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
+  
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -182,10 +179,34 @@ void vUartTask(void *argument)
 {
   /* USER CODE BEGIN vUartTask */
   /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+    //创建队列接收数据
+    uart_msg_st ltv_UartMsg;
+    gtv_UartTaskMsgQueueHandle = xQueueCreate(10, sizeof(uart_msg_st));
+    for(;;)
+    {
+        xQueueReceive(gtv_UartTaskMsgQueueHandle, &ltv_UartMsg, portMAX_DELAY);
+
+        switch(ltv_UartMsg.mcv_UartPort)
+        {
+        case UART_PORT1:
+            // HandleUART1RecvData(ltv_UartMsg.mcp_DataBuff, ltv_UartMsg.msv_MsgLength);
+            memset(gcv_Uart1RecvBuf, 0, RX_LEN_UART1);
+            break;
+
+        case UART_PORT2:
+            // HandleUART2RecvData(ltv_UartMsg.mcp_DataBuff, ltv_UartMsg.msv_MsgLength);
+            memset(gcv_Uart2RecvBuf, 0, RX_LEN_UART2);
+            break;
+
+        case UART_PORT3:
+            // HandleUART3RecvData(ltv_UartMsg.mcp_DataBuff, ltv_UartMsg.msv_MsgLength);
+            memset(gcv_Uart3RecvBuf, 0, RX_LEN_UART3);
+            break;
+
+        default:
+            break;
+        }
+    }
   /* USER CODE END vUartTask */
 }
 
