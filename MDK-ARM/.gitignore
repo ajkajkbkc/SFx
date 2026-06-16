@@ -1,4 +1,4 @@
-# 忽略 Keil 编译输出
+# Keil 生成文件
 *.hex
 *.axf
 *.o
@@ -9,20 +9,20 @@
 *.dep
 *.bak
 *.tmp
-*.htm          # 编译生成的 HTML
-*.Inp          # 临时输入文件
+*.htm
+*.Inp
 *.build_log.htm
 
-# 忽略调试日志
+# 调试日志
 JLinkLog.txt
 JLinkSettings.ini
 
-# 忽略用户界面布局（包含用户名）
+# 用户界面布局（包含用户名）
 *.uvguix.*
 
-# 忽略调试配置目录
+# 调试配置目录
 **/DebugConfig/
 **/RTE/Device/
 
-# 忽略 RTE 自动生成的头文件
+# RTE 自动生成头文件
 **/RTE/_MDK-ARM/RTE_Components.h
