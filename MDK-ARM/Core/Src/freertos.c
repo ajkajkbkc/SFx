@@ -49,9 +49,9 @@
 /* USER CODE BEGIN Variables */
 extern volatile bsp_uart_status_info_st gtv_UartPortStatus[MAX_SUPPORT_UART_PORT];
 /* uart recevie buffer */
-uint8_t gcv_Uart1RecvBuf[RX_LEN_UART1];
-uint8_t gcv_Uart2RecvBuf[RX_LEN_UART2];
-uint8_t gcv_Uart3RecvBuf[RX_LEN_UART3];
+extern uint8_t gcv_Uart1RecvBuf[RX_LEN_UART1];
+extern uint8_t gcv_Uart2RecvBuf[RX_LEN_UART2];
+extern uint8_t gcv_Uart3RecvBuf[RX_LEN_UART3];
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -67,30 +67,14 @@ const osThreadAttr_t UartTask_attributes = {
   .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for UartTimer1 */
-osTimerId_t UartTimer1Handle;
-const osTimerAttr_t UartTimer1_attributes = {
-  .name = "UartTimer1"
-};
-/* Definitions for UartTimer2 */
-osTimerId_t UartTimer2Handle;
-const osTimerAttr_t UartTimer2_attributes = {
-  .name = "UartTimer2"
-};
-/* Definitions for UartTimer3 */
-osTimerId_t UartTimer3Handle;
-const osTimerAttr_t UartTimer3_attributes = {
-  .name = "UartTimer3"
-};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-QueueHandle_t gtv_UartTaskMsgQueueHandle;
+extern QueueHandle_t gtv_UartTaskMsgQueueHandle;
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
 void vUartTask(void *argument);
-void UartTimerCallback(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -111,16 +95,6 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
-
-  /* Create the timer(s) */
-  /* creation of UartTimer1 */
-  UartTimer1Handle = osTimerNew(UartTimerCallback, osTimerPeriodic, (void*) 1, &UartTimer1_attributes);
-
-  /* creation of UartTimer2 */
-  UartTimer2Handle = osTimerNew(UartTimerCallback, osTimerPeriodic, (void*) 2, &UartTimer2_attributes);
-
-  /* creation of UartTimer3 */
-  UartTimer3Handle = osTimerNew(UartTimerCallback, osTimerPeriodic, (void*) 3, &UartTimer3_attributes);
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
@@ -182,6 +156,7 @@ void vUartTask(void *argument)
     //创建串口队列
     uart_msg_st ltv_UartMsg;
     gtv_UartTaskMsgQueueHandle = xQueueCreate(10, sizeof(uart_msg_st));
+    configASSERT(gtv_UartTaskMsgQueueHandle != NULL);
     for(;;)
     {
         xQueueReceive(gtv_UartTaskMsgQueueHandle, &ltv_UartMsg, portMAX_DELAY);
@@ -208,14 +183,6 @@ void vUartTask(void *argument)
         }
     }
   /* USER CODE END vUartTask */
-}
-
-/* UartTimerCallback function */
-void UartTimerCallback(void *argument)
-{
-  /* USER CODE BEGIN UartTimerCallback */
-
-  /* USER CODE END UartTimerCallback */
 }
 
 /* Private application code --------------------------------------------------*/

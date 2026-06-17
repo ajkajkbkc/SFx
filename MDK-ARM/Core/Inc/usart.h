@@ -29,7 +29,9 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "FreeRTOS.h"
+#include "timers.h"
+#include "queue.h"
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart1;
@@ -39,13 +41,13 @@ extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN Private defines */
+#define UART1_RX_TIMER_ID   1
+#define UART2_RX_TIMER_ID   2
+#define UART3_RX_TIMER_ID   3
 
-/* 串口一次接收最大长度 */
 #define RX_LEN_UART1      1024
 #define RX_LEN_UART2      1024
 #define RX_LEN_UART3      1024
-
-#define WORD_TIMEOUT      10  //定时器超时时间
 
 /*UART状态定义*/
 enum __UART_STATUS_E
@@ -62,11 +64,11 @@ enum __UART_STATUS_E
 enum __UART_PORT_E
 {
     /* 串口1 */
-    UART_PORT1 = 0,
+    UART_PORT1 = 1,
     /* 串口2 */
-    UART_PORT2 = 1,
+    UART_PORT2 = 2,
     /* 串口3 */
-    UART_PORT3,
+    UART_PORT3 = 3,
     /*  */
     MAX_SUPPORT_UART_PORT,
 };
@@ -93,7 +95,6 @@ typedef struct __BSP_UART_STATUS_INFO_ST
     /*接收数据长度计数*/
     unsigned short msv_RxCount;
 } bsp_uart_status_info_st;
-
 
 /* uart任务消息队列结构体 */
 typedef struct __UART_MSG_ST
@@ -149,7 +150,9 @@ void MX_USART2_UART_Init(void);
 void MX_USART3_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+static void bsp_uart_rx_time_init(TimerHandle_t *pxTimerHandle,uint32_t ulTimerID,const char *pcTimerName,unsigned short usRxPeriod);
+static void bsp_timer_callback_func(TimerHandle_t ltv_TimeHandle);
+void uartReceive_IDLE_FromISR(UART_HandleTypeDef *huart);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
