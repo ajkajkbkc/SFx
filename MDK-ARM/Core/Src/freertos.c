@@ -179,7 +179,7 @@ void vUartTask(void *argument)
 {
   /* USER CODE BEGIN vUartTask */
   /* Infinite loop */
-    //鍒涘缓闃熷垪鎺ユ敹鏁版嵁
+    //创建串口队列
     uart_msg_st ltv_UartMsg;
     gtv_UartTaskMsgQueueHandle = xQueueCreate(10, sizeof(uart_msg_st));
     for(;;)
