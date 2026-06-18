@@ -68,7 +68,9 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+#if (APP_IAP == 1)
+  IAP_Init();
+#endif
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
