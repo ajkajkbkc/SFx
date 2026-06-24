@@ -471,5 +471,47 @@ void uartReceive_IDLE_FromISR(UART_HandleTypeDef *huart)
         portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
 }
+
+/**
+  * @brief  处理从串口1收到的数据
+  * @param  pBuf 数据起始地址
+  * @param  cyLen 数据长度
+  * @retval None
+  */
+void HandleUART1RecvData(unsigned char *lcp_Buff, unsigned short lsv_Length)
+{
+
+
+    if(gtv_UartPortStatus[UART_PORT1].mcv_Mode == UART_MODE_DEFAULT)
+    {
+#if (APP_IAP == 1)
+        if(is_iap_update(lcp_Buff, lsv_Length))
+        {
+            HAL_NVIC_SystemReset();
+        }
+#endif
+    }
+
+}
+
+/**
+  * @brief  处理从串口2收到的数据
+  * @param  pBuf 数据起始地址
+  * @param  cyLen 数据长度
+  * @retval None
+  */
+void HandleUART2RecvData(unsigned char *lcp_Buff, unsigned short lsv_Length)
+{
+}
+
+/**
+  * @brief  处理从串口3收到的数据
+  * @param  pBuf 数据起始地址
+  * @param  cyLen 数据长度
+  * @retval None
+  */
+void HandleUART3RecvData(unsigned char *lcp_Buff, unsigned short lsv_Length)
+{
+}
 /* USER CODE END 1 */
 

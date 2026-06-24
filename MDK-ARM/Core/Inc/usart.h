@@ -153,6 +153,10 @@ void MX_USART3_UART_Init(void);
 static void bsp_uart_rx_time_init(TimerHandle_t *pxTimerHandle,uint32_t ulTimerID,const char *pcTimerName,unsigned short usRxPeriod);
 static void bsp_timer_callback_func(TimerHandle_t ltv_TimeHandle);
 void uartReceive_IDLE_FromISR(UART_HandleTypeDef *huart);
+
+void HandleUART1RecvData(unsigned char *lcp_Buff, unsigned short lsv_Length);
+void HandleUART2RecvData(unsigned char *lcp_Buff, unsigned short lsv_Length);
+void HandleUART3RecvData(unsigned char *lcp_Buff, unsigned short lsv_Length);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

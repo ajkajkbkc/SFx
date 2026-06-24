@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "iap.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -66,7 +66,7 @@ void Error_Handler(void);
 /* IAP opts -------------------------------------------------------------------------------- */
 /* If use this feature, In option [target] set IROM1 Start Address 0x8008000, Size 0x19000 */
 #ifndef APP_IAP
-#define APP_IAP                 0
+#define APP_IAP                 1
 #endif
 
 

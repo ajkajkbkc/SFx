@@ -135,9 +135,9 @@ void StartDefaultTask(void *argument)
   for(;;)
   {
 		HAL_GPIO_TogglePin(LED_G_GPIO_Port,LED_G_Pin);
-		osDelay(100);
+		osDelay(1000);
 		HAL_GPIO_TogglePin(LED_R_GPIO_Port,LED_R_Pin);
-		osDelay(100);
+		osDelay(1000);
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -164,17 +164,17 @@ void vUartTask(void *argument)
        switch(ltv_UartMsg.mcv_UartPort)
        {
        case UART_PORT1:
-           // HandleUART1RecvData(ltv_UartMsg.mcp_DataBuff, ltv_UartMsg.msv_MsgLength);
+           HandleUART1RecvData(ltv_UartMsg.mcp_DataBuff, ltv_UartMsg.msv_MsgLength);
            memset(gcv_Uart1RecvBuf, 0, RX_LEN_UART1);
            break;
 
        case UART_PORT2:
-           // HandleUART2RecvData(ltv_UartMsg.mcp_DataBuff, ltv_UartMsg.msv_MsgLength);
+           HandleUART2RecvData(ltv_UartMsg.mcp_DataBuff, ltv_UartMsg.msv_MsgLength);
            memset(gcv_Uart2RecvBuf, 0, RX_LEN_UART2);
            break;
 
        case UART_PORT3:
-           // HandleUART3RecvData(ltv_UartMsg.mcp_DataBuff, ltv_UartMsg.msv_MsgLength);
+           HandleUART3RecvData(ltv_UartMsg.mcp_DataBuff, ltv_UartMsg.msv_MsgLength);
            memset(gcv_Uart3RecvBuf, 0, RX_LEN_UART3);
            break;
 
