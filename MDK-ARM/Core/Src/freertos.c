@@ -154,48 +154,33 @@ void vUartTask(void *argument)
   /* USER CODE BEGIN vUartTask */
   /* Infinite loop */
     //创建串口队列
-//    uart_msg_st ltv_UartMsg;
-//    gtv_UartTaskMsgQueueHandle = xQueueCreate(10, sizeof(uart_msg_st));
-//    configASSERT(gtv_UartTaskMsgQueueHandle != NULL);
-		uint8_t cmd;
+    uart_msg_st ltv_UartMsg;
+    gtv_UartTaskMsgQueueHandle = xQueueCreate(10, sizeof(uart_msg_st));
+    configASSERT(gtv_UartTaskMsgQueueHandle != NULL);
     for(;;)
     {
-//        xQueueReceive(gtv_UartTaskMsgQueueHandle, &ltv_UartMsg, portMAX_DELAY);
+       xQueueReceive(gtv_UartTaskMsgQueueHandle, &ltv_UartMsg, portMAX_DELAY);
 
-//        switch(ltv_UartMsg.mcv_UartPort)
-//        {
-//        case UART_PORT1:
-//            // HandleUART1RecvData(ltv_UartMsg.mcp_DataBuff, ltv_UartMsg.msv_MsgLength);
-//            memset(gcv_Uart1RecvBuf, 0, RX_LEN_UART1);
-//            break;
+       switch(ltv_UartMsg.mcv_UartPort)
+       {
+       case UART_PORT1:
+           // HandleUART1RecvData(ltv_UartMsg.mcp_DataBuff, ltv_UartMsg.msv_MsgLength);
+           memset(gcv_Uart1RecvBuf, 0, RX_LEN_UART1);
+           break;
 
-//        case UART_PORT2:
-//            // HandleUART2RecvData(ltv_UartMsg.mcp_DataBuff, ltv_UartMsg.msv_MsgLength);
-//            memset(gcv_Uart2RecvBuf, 0, RX_LEN_UART2);
-//            break;
+       case UART_PORT2:
+           // HandleUART2RecvData(ltv_UartMsg.mcp_DataBuff, ltv_UartMsg.msv_MsgLength);
+           memset(gcv_Uart2RecvBuf, 0, RX_LEN_UART2);
+           break;
 
-//        case UART_PORT3:
-//            // HandleUART3RecvData(ltv_UartMsg.mcp_DataBuff, ltv_UartMsg.msv_MsgLength);
-//            memset(gcv_Uart3RecvBuf, 0, RX_LEN_UART3);
-//            break;
+       case UART_PORT3:
+           // HandleUART3RecvData(ltv_UartMsg.mcp_DataBuff, ltv_UartMsg.msv_MsgLength);
+           memset(gcv_Uart3RecvBuf, 0, RX_LEN_UART3);
+           break;
 
-//        default:
-//            break;
-//        }
-
-        /* 阻塞等待 USART1 收到一个字节 */
-        if (HAL_UART_Receive(&huart1, &cmd, 1, portMAX_DELAY) == HAL_OK)
-        {
-            if (cmd == 'R')
-            {
-                /* 关闭外设 → 复位 → bootloader 启动 */
-                HAL_UART_DeInit(&huart1);
-                HAL_UART_DeInit(&huart3);
-                HAL_DeInit();
-                __disable_irq();
-                NVIC_SystemReset();
-            }
-        }
+       default:
+           break;
+       }
     }
   /* USER CODE END vUartTask */
 }
