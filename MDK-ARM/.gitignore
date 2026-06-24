@@ -1,5 +1,6 @@
 # Keil 生成文件
 *.hex
+*.bin
 *.axf
 *.o
 *.crf
