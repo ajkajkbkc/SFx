@@ -24,7 +24,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "log.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -95,7 +95,9 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-
+#if PRINT_LOG_OPEN == 1
+  uartlog_init();  //³õÊ¼»¯log´®¿Ú
+#endif
   /* USER CODE END 2 */
 
   /* Init scheduler */

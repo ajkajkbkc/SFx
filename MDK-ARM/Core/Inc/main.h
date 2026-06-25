@@ -69,14 +69,13 @@ void Error_Handler(void);
 #define APP_IAP                 1
 #endif
 
-
 /* Print log opts -------------------------------------------------------------------------- */
 #ifndef PRINT_LOG_OPEN
-#define PRINT_LOG_OPEN          0 // 1：打开print log功能（只有此为1，才能打印log）
+#define PRINT_LOG_OPEN          1 // 1：打开print log功能（只有此为1，才能打印log）
 #endif
 
 #ifndef UART1_AS_LOG
-#define UART1_AS_LOG            0 // 1: 通过UART1打印log, PA9,PA10
+#define UART1_AS_LOG            1 // 1: 通过UART1打印log, PA9,PA10
 #endif
 
 #ifndef UART2_AS_LOG

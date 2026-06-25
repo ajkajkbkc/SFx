@@ -4,7 +4,11 @@
 
 
 /* Private define ------------------------------------------------------------*/
+
 /* Private variables ---------------------------------------------------------*/
+extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart2;
+extern UART_HandleTypeDef huart3;
 /* Private function prototypes -----------------------------------------------*/
 void LogUart_Init(UART_HandleTypeDef *huart);
 

@@ -480,8 +480,6 @@ void uartReceive_IDLE_FromISR(UART_HandleTypeDef *huart)
   */
 void HandleUART1RecvData(unsigned char *lcp_Buff, unsigned short lsv_Length)
 {
-
-
     if(gtv_UartPortStatus[UART_PORT1].mcv_Mode == UART_MODE_DEFAULT)
     {
 #if (APP_IAP == 1)
@@ -491,7 +489,6 @@ void HandleUART1RecvData(unsigned char *lcp_Buff, unsigned short lsv_Length)
         }
 #endif
     }
-
 }
 
 /**
