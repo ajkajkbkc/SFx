@@ -43,4 +43,5 @@ Objects/
 
 # ========== ºöÂÔ CubeMX ÁÙÊ±ÎÄ¼ş ==========
 .mxproject
-STM32CubeMX/
+STM32CubeMX/Drivers/
+Middlewares/
