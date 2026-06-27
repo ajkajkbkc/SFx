@@ -27,3 +27,20 @@ JLinkSettings.ini
 
 # RTE 自动生成头文件
 **/RTE/_MDK-ARM/RTE_Components.h
+
+# ========== 新增：完全忽略 Drivers 和 Middlewares ==========
+Drivers/
+Middlewares/
+
+# ========== 忽略编译输出目录 ==========
+Binary/
+Build/
+Output/
+Listings/
+Objects/
+**/Listings/
+**/Objects/
+
+# ========== 忽略 CubeMX 临时文件 ==========
+.mxproject
+STM32CubeMX/
