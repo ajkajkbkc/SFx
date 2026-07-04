@@ -28,6 +28,7 @@
 #include "queue.h"
 #include <string.h>
 #include "usart.h"
+#include "ntc.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -112,7 +113,7 @@ void MX_FREERTOS_Init(void) {
   UartTaskHandle = osThreadNew(vUartTask, NULL, &UartTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
+  ntcTaskHandle = osThreadNew(NtcTask, NULL, &ntcTask_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
