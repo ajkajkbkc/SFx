@@ -104,6 +104,7 @@ int main(void)
   MX_ADC1_Init();
   MX_I2C1_Init();
   MX_SPI2_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 #if PRINT_LOG_OPEN == 1
   uartlog_init();  //³õÊ¼»¯log´®¿Ú
