@@ -30,10 +30,6 @@
 uint16_t adc_data[4];  // ADC data buffer
 extern ADC_HandleTypeDef hadc1;
 /* Private function prototypes -----------------------------------------------*/
-
-
-/* Private user code ---------------------------------------------------------*/
-/* Definitions for ntcTask */
 osThreadId_t ntcTaskHandle;
 const osThreadAttr_t ntcTask_attributes =
 {
@@ -42,7 +38,7 @@ const osThreadAttr_t ntcTask_attributes =
     .stack_size = 128 * 4
 };
 
-
+/* Private user code ---------------------------------------------------------*/
 /**
   * @brief  adc init
   * @param  None
@@ -147,7 +143,7 @@ void first_get_temp(void)
 
     for(i = 0; i < 4; i++)
     {
-        adc_data[i] = 0;
+        // adc_data[i] = 0;
 
         usTemp = Calculate_Voltage(adc_data[i]);
         //LOGI("app_ntc1", "Tmp[%d] = %6d", i, usTemp);

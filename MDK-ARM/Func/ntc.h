@@ -4,19 +4,15 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+/* Private defines -----------------------------------------------------------*/
 
 /* Exported types ------------------------------------------------------------*/
 
-
-
-/* Exported constants --------------------------------------------------------*/
-
-
-/* Private defines -----------------------------------------------------------*/
+/* Exported macro ------------------------------------------------------------*/
 extern osThreadId_t ntcTaskHandle;
 extern const osThreadAttr_t ntcTask_attributes;
 
-/* Private functions ---------------------------------------------------------*/
+/* Exported functions prototypes ---------------------------------------------*/
 void NtcTask(void *argument);
 
 #endif /* _NTC_H */

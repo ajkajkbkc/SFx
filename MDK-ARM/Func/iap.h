@@ -5,13 +5,6 @@
 #include "main.h"
 #include "stdbool.h"
 
-/* Exported types ------------------------------------------------------------*/
-
-
-
-/* Exported constants --------------------------------------------------------*/
-
-
 /* Private defines -----------------------------------------------------------*/
 //App区域和Bootloader区域共享信息的地址(暂定大小为2K)
 #define IAP_FLAG_ADDR               (uint32_t)(APPLICATION_ADDRESS - 1024 * 2)
@@ -32,9 +25,11 @@
 /* Define the address from where user application will be loaded,
   the application address should be a start sector address */
 #define APPLICATION_ADDRESS         (FLASH_BASE + IAP_BOOTLOADER_FLASH_SIZE)
+/* Exported types ------------------------------------------------------------*/
 
+/* Exported macro ------------------------------------------------------------*/
 
-/* Private functions ---------------------------------------------------------*/
+/* Exported functions prototypes ---------------------------------------------*/
 void IAP_Init(void);
 bool is_iap_update(uint8_t *cStr, uint32_t baudrate);
 

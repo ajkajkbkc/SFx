@@ -190,7 +190,7 @@
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
-            <useUlib>0</useUlib>
+            <useUlib>1</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xE</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../Func;..\W5500\Ethernet</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../Func;../W5500/Ethernet;../W5500/Internet/MQTT;..\W5500\Ethernet\W5500</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1321,6 +1321,26 @@
               <FileName>ntc.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Func\ntc.h</FilePath>
+            </File>
+            <File>
+              <FileName>W5500Task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Func\W5500Task.c</FilePath>
+            </File>
+            <File>
+              <FileName>W5500Task.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Func\W5500Task.h</FilePath>
+            </File>
+            <File>
+              <FileName>parameter.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Func\parameter.c</FilePath>
+            </File>
+            <File>
+              <FileName>parameter.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Func\parameter.h</FilePath>
             </File>
           </Files>
         </Group>
