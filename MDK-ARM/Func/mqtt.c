@@ -9,21 +9,26 @@
 #include "mqtt_interface.h"
 #include "MQTTClient.h"
 #include <string.h>
+#include "semphr.h"
 /* Private define ------------------------------------------------------------*/
-uint8_t gMqttInitErrorTimes = 0;
-uint8_t gPublishErrorTimes = 0;
-uint8_t gMqttPingErrorTimes = 0;
-
-__IO uint8_t gMqttPingState = MQTT_NO_PING;
-/* Private variables ---------------------------------------------------------*/
-TimerHandle_t MqttPingTimr_Handle = NULL;
-
 static uint8_t mqttReadBuffer[1024];
 static uint8_t mqttSendBuffer[1024];
 
 static MQTTClient mqttClient;
 static Network mqttNetwork;
+/* Private variables ---------------------------------------------------------*/
+uint8_t gMqttInitErrorTimes = 0;
+uint8_t gPublishErrorTimes = 0;
+uint8_t gMqttPingErrorTimes = 0;
 
+__IO uint8_t gPyldRtu_Idx = 0;  //终端（RTU）索引，用于遍历当前正在处理的是第几个 RTU 终端设备
+__IO uint8_t gPyldP_Idx = 0;    //总控制点索引（全局索引），用于遍历 所有终端的全部控制点
+__IO uint8_t gPyldOneP_Idx = 0; //单个终端内的控制点子索引（局部索引），用于记录当前正在遍历的是 当前 RTU 终端内部的第几个控制点
+
+__IO uint8_t gMqttPingState = MQTT_NO_PING;
+
+TimerHandle_t MqttPingTimr_Handle = NULL;
+SemaphoreHandle_t  CtrlP_MuxSem = NULL;
 /* Private function prototypes -----------------------------------------------*/
 osThreadId_t mqttTaskHandle;
 const osThreadAttr_t mqttTask_attributes =
@@ -160,6 +165,61 @@ void MqttPingTimr_Start(void)
 }
 
 /**
+  * @brief  创建传感点互斥量
+  */
+void CtrlPMutexInit(void)
+{
+    BaseType_t xReturn = pdPASS;/* 定义一个创建信息返回值，默认为pdPASS */
+
+    /* 创建MuxSem */
+    CtrlP_MuxSem = xSemaphoreCreateMutex();
+    if(NULL != CtrlP_MuxSem)
+    {
+        LOGD("internet", "CtrlP_MuxSem mutex create success !\r\n");
+
+        xSemaphoreTake(CtrlP_MuxSem, portMAX_DELAY);
+
+        xReturn = xSemaphoreGive( CtrlP_MuxSem );//给出互斥量
+        if( xReturn == pdTRUE )
+        {
+            LOGD("internet", "CtrlP_MuxSem give success !\r\n");
+        }
+    }
+    else
+    {
+        LOGE("internet", "CtrlP_MuxSem mutex create FAILED !\r\n");
+    }
+}
+/**
+  * @brief  获取传感点互斥锁，保护传感点相关操作不被多任务并发访问
+  * @note   配合 CtrlPMutexUnlock() 成对使用，所有访问传感点硬件的操作都应先获取此锁
+  * @retval pdTRUE  - 成功获取互斥锁
+  *         pdFALSE - 互斥锁未初始化，获取失败
+  */
+int CtrlPMutexLock(void)
+{
+    if(NULL == CtrlP_MuxSem)
+    {
+        return pdFALSE;
+    }
+    return xSemaphoreTake(CtrlP_MuxSem, portMAX_DELAY);
+}
+/**
+  * @brief  释放传感点互斥锁
+  * @note   与 CtrlPMutexLock() 成对使用
+  * @retval pdTRUE  - 成功释放互斥锁
+  *         pdFALSE - 互斥锁未初始化或释放失败
+  */
+int CtrlPMutexUnlock(void)
+{
+    if(NULL == CtrlP_MuxSem)
+    {
+        return pdFALSE;
+    }
+    return xSemaphoreGive(CtrlP_MuxSem);
+}
+
+/**
   * @brief  新建线程（任务）
   * @param  None
   * @retval None
@@ -167,6 +227,83 @@ void MqttPingTimr_Start(void)
 void osThreadNew_mqttTask(void)
 {
     mqttTaskHandle = osThreadNew(mqttTask, NULL, &mqttTask_attributes);
+}
+
+/**
+  * @brief  MQTT定时发送任务
+  * @param  None
+  * @retval None
+  */
+void Mqtt_TrsmNormalTask(void)
+{
+    static uint32_t TrsmItvSecCnt = 0;
+    uint8_t ret;
+
+    //不是第一次并且没到时间发送
+    if( (TrsmItvSecCnt != 0) && (gParam.st.SecCnt - TrsmItvSecCnt < gFlashParam.st.mqttPublishInterval * 60) )
+    {
+        return;
+    }
+
+    CtrlPMutexLock();
+
+    TrsmItvSecCnt = gParam.st.SecCnt;
+
+    LOGW("mqtt", "Start to mqtt normal transmit !!!!!!!!!!!!\r\n");
+    char *payload = (char *)pvPortMalloc(1024);
+    char *topic = (char *)pvPortMalloc(128);
+    int payloadlen = 0;
+
+    gPyldRtu_Idx = 0;
+    gPyldP_Idx = 0;
+    gPyldOneP_Idx = 0;
+
+    memset(topic, 0, 128);
+    memcpy(topic, gFlashParam.st.mqttPub, 100);
+
+    for(;;)
+    {
+        memset(payload, 0, 1024);
+
+        if(gPyldP_Idx == gCtrlP_Num)  //payload结束
+        {
+            break ;
+        }
+
+        GetOnePayload(payload);
+        payloadlen = strlen(payload);
+        LOGD("mqtt_TrsmNomal", "Publish Topic  : %s", topic);
+        LOGI("mqtt_TrsmNomal", "Publish Payload: %s", payload);
+
+        ret = Mqtt_Transmit(topic, payload, payloadlen);
+        if(ret == MQTT_SEND_OK)
+        {
+            gPyldP_Idx++;
+            gPyldOneP_Idx++;
+            if(gPyldOneP_Idx == CtrlPNum_Table[gRtu_InfoPacket.Rtu_Info[gPyldRtu_Idx].RtuType])
+            {
+                gPyldRtu_Idx++;
+                gPyldOneP_Idx = 0;
+            }
+        }
+        else
+        {
+            if(ret == MQTT_SEND_ERROVER)
+            {
+                TrsmItvSecCnt = 0;
+                break ;
+            }
+            else if(ret == MQTT_SEND_ERR)
+            {
+                continue;
+            }
+        }
+    }
+
+    vPortFree(topic);
+    vPortFree(payload);
+
+    CtrlPMutexUnlock();
 }
 
 /**
@@ -224,7 +361,7 @@ void mqttTask(void *argument)
             PAR_SET_BIT(gParam.st.NetLink_State, NET_STATE_MQTT);
         }
 
-        // Mqtt_TrsmNormalTask();
+        Mqtt_TrsmNormalTask();
 
         // Mqtt_TrsmAlmTask();
 
