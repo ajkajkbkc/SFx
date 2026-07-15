@@ -32,6 +32,8 @@
 #include "W5500Task.h"
 #include "parameter.h"
 #include "log.h"
+#include "iwdg.h"
+#include "rtc.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -69,7 +71,7 @@ osThreadId_t UartTaskHandle;
 const osThreadAttr_t UartTask_attributes = {
   .name = "UartTask",
   .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityAboveNormal,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -140,6 +142,15 @@ void StartDefaultTask(void *argument)
   for(;;)
   {
 		osDelay(1000);
+    HAL_IWDG_Refresh(&hiwdg);
+    gParam.st.SecCnt++;
+    gFlashParam.st.SecCntAll++;
+    if(gParam.st.SecCnt % 3 == 0)  //save SecCntAll in BKP
+    {
+        HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR41, gFlashParam.st.SecCntAll);
+        HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR42, (gFlashParam.st.SecCntAll >> 16));
+    }
+
 #if (PRINT_LOG_OPEN == 1)
     UBaseType_t uxArraySize, x;
     TaskStatus_t *pxTaskStatusArray;

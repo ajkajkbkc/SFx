@@ -49,7 +49,9 @@ typedef union
     struct
     {
         uint32_t Prod_Protocol;                       //(D1025)04 01  产品通讯协议
-        uint32_t Module_Reg32_reserve[99];            //(D1025)04 03  预留32位模组寄存器
+        uint32_t idNum;                               //(D1027)04 03  站号
+        uint32_t SecCntAll;                           //(D1029)04 05  出厂后运行的总秒数
+        uint32_t Module_Reg32_reserve[99];            //(D1031)04 07  预留32位模组寄存器
 
         uint16_t localUDPPort;                        //(D1225)04 C9  本机UDP端口
         uint16_t s0LocalPort;                         //(D1226)04 CA  S0本机端口
