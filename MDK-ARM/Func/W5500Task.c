@@ -6,6 +6,7 @@
 #include "parameter.h"
 #include "w5500.h"
 #include "string.h"
+#include "mqtt.h"
 /* Private define ------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
@@ -17,11 +18,37 @@ osThreadId_t W5500TaskHandle;
 const osThreadAttr_t W5500Task_attributes =
 {
     .name = "W5500Task",
-    .priority = (osPriority_t) osPriorityBelowNormal,
-    .stack_size = 512 * 4
+    .priority = (osPriority_t) osPriorityNormal,
+    .stack_size = 128 * 4
 };
 
 /* Private user code ---------------------------------------------------------*/
+/**
+  * @brief  创建W5500互斥量
+  */
+void W5500MutexInit(void)
+{
+    BaseType_t xReturn = pdPASS;/* 定义一个创建信息返回值，默认为pdPASS */
+
+    /* 创建MuxSem */
+    gW5500_MuxSem = xSemaphoreCreateMutex();
+    if(NULL != gW5500_MuxSem)
+    {
+        LOGD("internet", "gW5500_MuxSem mutex create success !\r\n");
+
+        xSemaphoreTake(gW5500_MuxSem, portMAX_DELAY);
+
+        xReturn = xSemaphoreGive( gW5500_MuxSem );//给出互斥量
+        if( xReturn == pdTRUE )
+        {
+            LOGD("internet", "gW5500_MuxSem give success !\r\n");
+        }
+    }
+    else
+    {
+        LOGE("internet", "gW5500_MuxSem mutex create FAILED !\r\n");
+    }
+}
 /**
   * @brief  获取W5500互斥锁，保护W5500相关操作（SPI通信等）不被多任务并发访问
   * @note   配合 W5500MutexUnlock() 成对使用，所有访问W5500硬件的操作都应先获取此锁
@@ -52,21 +79,7 @@ int W5500MutexUnlock(void)
     return xSemaphoreGive(gW5500_MuxSem);
 }
 
-/**
-  * @brief  W5500硬件复位
-  * @param  None
-  * @retval None
-  */
-void W5500_HardwareReset(void)
-{
-    HAL_GPIO_WritePin(W5500_RST_GPIO_Port, W5500_RST_Pin, GPIO_PIN_RESET);
-    osDelay(1);
-    HAL_GPIO_WritePin(W5500_RST_GPIO_Port, W5500_RST_Pin, GPIO_PIN_SET);
-    osDelay(1600);
-    LOGW("internet", "W5500Hardware Reset!!!!!!!");
-}
-
-/* W5500 port -------------------------------------------------------- */
+/* W5500 接口函数 -------------------------------------------------------- */
 void W5500WriteByte(unsigned char byte)
 {
     HAL_SPI_Transmit(&hspi1, &byte, 1, HAL_MAX_DELAY);
@@ -92,7 +105,60 @@ void W5500DeSelect(void)
 }
 
 /**
-  * @brief  W5500硬件接口初始化
+  * @brief  W5500硬件复位
+  * @param  None
+  * @retval None
+  */
+void W5500_HardwareReset(void)
+{
+    HAL_GPIO_WritePin(W5500_RST_GPIO_Port, W5500_RST_Pin, GPIO_PIN_RESET);
+    osDelay(1);
+    HAL_GPIO_WritePin(W5500_RST_GPIO_Port, W5500_RST_Pin, GPIO_PIN_SET);
+    osDelay(1600);
+    LOGW("internet", "W5500Hardware Reset!!!!!!!");
+}
+/**
+  * @brief  获取连接状态
+  * @param  None
+  * @retval true or false
+  */
+bool Get_PHYLINK(void)
+{
+    static uint8_t errCnt = 0, okCnt = 0;
+    int8_t phylink_state = PHY_LINK_OFF;
+
+    W5500MutexLock();
+    ctlwizchip(CW_GET_PHYLINK, (void *)&phylink_state);//get phy status
+    W5500MutexUnlock();
+
+    if(phylink_state != PHY_LINK_ON)
+    {
+        LOGE("internet", "PHY link ERROR, PHY link status = %u", phylink_state);
+        okCnt = 0;
+        errCnt++;
+        if(errCnt > 5) //超过5次，标志位才置一
+        {
+            errCnt = 0;
+            PAR_SET_BIT(gParam.st.NetLink_State, NET_STATE_PHYLINK);
+
+            LOGE("internet", "Set flag NET_STATE_PHYLINK!");
+        }
+        return false ;
+    }
+
+    errCnt = 0;
+    okCnt++;
+    if(okCnt > 5)
+    {
+        okCnt = 0;
+        PAR_CLEAR_BIT(gParam.st.NetLink_State, NET_STATE_PHYLINK);  //PHYLINK OK
+    }
+
+    return true;
+}
+
+/**
+  * @brief  W5500硬件接口初始化，底层函数初始化
   * @param  None
   * @retval None
   */
@@ -122,7 +188,7 @@ static void print_network_information(wiz_NetInfo *netInfo)
 }
 
 /**
-  * @brief  配置本机地址等信息
+  * @brief  配置本机地址等信息，硬件就绪后，需要通过SPI总线配置W5500的内部寄存器
   * @param  None
   * @retval true or false
   */
@@ -195,27 +261,28 @@ bool W5500_ResetConfig(void)
     return true;
 }
 
-void W5500MutexInit(void)
+/**
+  * @brief  W5500初始化
+  * @param  None
+  * @retval None
+  */
+void W5500_Init(void)
 {
-    BaseType_t xReturn = pdPASS;/* 定义一个创建信息返回值，默认为pdPASS */
+    LOGV("internet", "Enter %s()", __func__);
+    int8_t phylink_state = PHY_LINK_OFF;
 
-    /* 创建MuxSem */
-    gW5500_MuxSem = xSemaphoreCreateMutex();
-    if(NULL != gW5500_MuxSem)
+    W5500_HardwareReset();
+    W5500_PortInitialize();
+    if(!W5500_ConfigInfo()) //config fail
     {
-        LOGD("internet", "gW5500_MuxSem mutex create success !\r\n");
-
-        xSemaphoreTake(gW5500_MuxSem, portMAX_DELAY);
-
-        xReturn = xSemaphoreGive( gW5500_MuxSem );//给出互斥量
-        if( xReturn == pdTRUE )
-        {
-            LOGD("internet", "gW5500_MuxSem give success !\r\n");
-        }
+        return ;
     }
-    else
+
+    ctlwizchip(CW_GET_PHYLINK, (void *)&phylink_state);//get phy status
+    if(phylink_state != PHY_LINK_ON)
     {
-        LOGE("internet", "gW5500_MuxSem mutex create FAILED !\r\n");
+        PAR_SET_BIT(gParam.st.NetLink_State, NET_STATE_PHYLINK);
+        LOGE("internet", "W5500 Init, PHY link ERROR, Set flag NET_STATE_PHYLINK!");
     }
 }
 
@@ -228,27 +295,27 @@ void W5500Task(void *argument)
 {
     LOGD("app_W5500", "%s RUN. Free heap size is %d bytes", __func__, xPortGetFreeHeapSize());
 
-    // uint8_t phylink_errCnt = 0;
+    uint8_t phylink_errCnt = 0;
 
     W5500MutexInit();
 
-    // //start thread
-    // if(gFlashParam.st.Prod_Protocol & PROTOCOL_MBTCP)
-    // {
-    //     osThreadNew_mbTcpTask();
-    // }
-    // if(gFlashParam.st.Prod_Protocol & PROTOCOL_FLKMQTT)
-    // {
-    //     osThreadNew_mqttTask();
-    // }
-    // if(gFlashParam.st.Prod_Protocol & PROTOCOL_HZUDP)
-    // {
-    //     osThreadNew_HuaziudpTask();
-    // }
-    // else if(gFlashParam.st.Prod_Protocol & PROTOCOL_LLTUDP) //if use hzudp, can not use lltudp
-    // {
-    //     osThreadNew_lltudpTask();
-    // }
+    //start thread
+    if(gFlashParam.st.Prod_Protocol & PROTOCOL_MBTCP)
+    {
+        // osThreadNew_mbTcpTask();
+    }
+    if(gFlashParam.st.Prod_Protocol & PROTOCOL_FLKMQTT)
+    {
+        osThreadNew_mqttTask();
+    }
+    if(gFlashParam.st.Prod_Protocol & PROTOCOL_HZUDP)
+    {
+        // osThreadNew_HuaziudpTask();
+    }
+    else if(gFlashParam.st.Prod_Protocol & PROTOCOL_LLTUDP) //if use hzudp, can not use lltudp
+    {
+        // osThreadNew_lltudpTask();
+    }
 
     for(;;)
     {
@@ -261,6 +328,49 @@ void W5500Task(void *argument)
             W5500_ResetConfig();
             continue ;
         }
+
+        if(Get_PHYLINK() != true)
+        {
+            //osDelay(100);  //~1s
+            phylink_errCnt++;
+            if(phylink_errCnt > 100)
+            {
+                phylink_errCnt = 0;
+                W5500_ResetConfig();
+            }
+            continue ;
+        }
+        else if(phylink_errCnt != 0)
+        {
+            phylink_errCnt = 0;
+        }
+
+        // if(gFlashParam.st.Prod_Protocol & PROTOCOL_MBTCP)
+        // {
+        //     if(gMbTcpErrorTimes > MBTCP_ERROR_TIMES)
+        //     {
+        //         gMbTcpErrorTimes = 0;
+        //         W5500_ResetConfig();
+        //     }
+        // }
+
+        if(gFlashParam.st.Prod_Protocol & PROTOCOL_FLKMQTT)
+        {
+            if(gMqttInitErrorTimes > MQTTINIT_ERROR_TIMES)
+            {
+                gMqttInitErrorTimes = 0;
+                W5500_ResetConfig();
+            }
+        }
+
+        // if( (gFlashParam.st.Prod_Protocol & PROTOCOL_HZUDP) || (gFlashParam.st.Prod_Protocol & PROTOCOL_LLTUDP) )
+        // {
+        //     if(gUDPErrorTimes > UDP_ERROR_TIMES)
+        //     {
+        //         gUDPErrorTimes = 0;
+        //         W5500_ResetConfig();
+        //     }
+        // }
 
     }
 }

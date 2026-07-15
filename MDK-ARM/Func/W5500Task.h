@@ -6,7 +6,25 @@
 #include "cmsis_os.h"
 
 /* Private defines -----------------------------------------------------------*/
-
+#define PROTOCOL_TYPE                 (PROTOCOL_FLKMQTT)
+/* ----------------------- 通讯协议 --------------------------- */
+#define PROTOCOL_XX                   0xFFFF
+#define PROTOCOL_MB                   0x0000
+#define PROTOCOL_MBTCP                0x0001  //modbusTCP协议
+#define PROTOCOL_FLKMQTT              0x0002  //FexlinkMQTT协议
+#define PROTOCOL_HZUDP                0x0004  //华咨UDP协议
+#define PROTOCOL_LLTUDP               0x0008  //路路通UDP协议
+/* ------------------------------------------------------------ */
+/* ------------------------socket编号-------------------------- */
+#define   APP_SOCKET_HUAZIUDP  0
+#define   APP_SOCKET_MQTT      1
+#define   APP_SOCKET_SNTP      2
+#define   APP_SOCKET_MODBUS    3
+#define   APP_SOCKET_DHCP      4
+#define   APP_SOCKET_DNS       5
+#define   APP_SOCKET_HTTPS     6
+#define   APP_SOCKET_NETBIOS   7
+/* ------------------------------------------------------------ */
 /*
     NetLink_State 寄存器位定义 (对应 gParam.st.NetLink_State)
     每个位表示一个网络模块的状态：0 = 正常(normal)  1 = 异常(error)
@@ -43,6 +61,7 @@
 #define NET_STATE_UDP_Msk                      (0x1UL << NET_STATE_UDP_Pos) /* UDP通信状态      位掩码 */
 #define NET_STATE_UDP                          NET_STATE_UDP_Msk            /* UDP通信状态      位值   */
 
+#define NET_STATE_OK                           (NET_STATE_SPI | NET_STATE_PHYLINK)
 /* Exported types ------------------------------------------------------------*/
 
 /* Exported macro ------------------------------------------------------------*/
@@ -50,6 +69,9 @@ extern osThreadId_t W5500TaskHandle;
 extern const osThreadAttr_t W5500Task_attributes;
 
 /* Exported functions prototypes ---------------------------------------------*/
+void W5500_Init(void);
 void W5500Task(void *argument);
-
+void W5500MutexInit(void);
+int W5500MutexLock(void);
+int W5500MutexUnlock(void);
 #endif // _W5500TASK_H

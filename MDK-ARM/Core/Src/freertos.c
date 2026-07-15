@@ -30,6 +30,8 @@
 #include "usart.h"
 #include "ntc.h"
 #include "W5500Task.h"
+#include "parameter.h"
+#include "log.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -67,7 +69,7 @@ osThreadId_t UartTaskHandle;
 const osThreadAttr_t UartTask_attributes = {
   .name = "UartTask",
   .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityAboveNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -137,10 +139,46 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-		HAL_GPIO_TogglePin(LED_G_GPIO_Port,LED_G_Pin);
 		osDelay(1000);
-		HAL_GPIO_TogglePin(LED_R_GPIO_Port,LED_R_Pin);
-		osDelay(1000);
+#if (PRINT_LOG_OPEN == 1)
+    UBaseType_t uxArraySize, x;
+    TaskStatus_t *pxTaskStatusArray;
+
+    uxArraySize = uxTaskGetNumberOfTasks();
+    pxTaskStatusArray = pvPortMalloc(uxArraySize * sizeof(TaskStatus_t));
+    if(pxTaskStatusArray != NULL)
+    {
+        uxArraySize = uxTaskGetSystemState(pxTaskStatusArray, uxArraySize, NULL);
+        LOGE("app_main", "================================================");
+        LOGE("app_main", "TotalHeap=%u  FreeHeap=%u  MinEverFree=%u",
+            (unsigned int)configTOTAL_HEAP_SIZE,
+            (unsigned int)xPortGetFreeHeapSize(),
+            (unsigned int)xPortGetMinimumEverFreeHeapSize());
+        LOGE("app_main", "Task Name            State  Priority  FreeStack");
+        LOGE("app_main", "------------------------------------------------");
+        for(x = 0; x < uxArraySize; x++)
+        {
+            const char *stateStr;
+            switch(pxTaskStatusArray[x].eCurrentState)
+            {
+                case eRunning:   stateStr = "RUN";  break;
+                case eReady:     stateStr = "RDY";  break;
+                case eBlocked:   stateStr = "BLK";  break;
+                case eSuspended: stateStr = "SUS";  break;
+                case eDeleted:   stateStr = "DEL";  break;
+                default:         stateStr = "UNK";  break;
+            }
+            LOGE("app_main", "%-20s %-5s %-5u %-5u",
+                pxTaskStatusArray[x].pcTaskName,
+                stateStr,
+                pxTaskStatusArray[x].uxCurrentPriority,
+                pxTaskStatusArray[x].usStackHighWaterMark);
+        }
+        LOGE("app_main", "================================================");
+        vPortFree(pxTaskStatusArray);
+    }
+#endif
+		
   }
   /* USER CODE END StartDefaultTask */
 }

@@ -30,6 +30,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "log.h"
+#include "parameter.h"
+#include "W5500Task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -106,9 +108,14 @@ int main(void)
   MX_SPI2_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
+  Parameter_Init();
 #if PRINT_LOG_OPEN == 1
   uartlog_init();  //³õÊ¼»¯log´®¿Ú
 #endif
+  if(gFlashParam.st.Prod_Protocol > PROTOCOL_MB)
+  {
+    W5500_Init();
+  }
   /* USER CODE END 2 */
 
   /* Init scheduler */

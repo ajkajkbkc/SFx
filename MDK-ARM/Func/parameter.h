@@ -6,6 +6,8 @@
 #include "cmsis_os.h"
 
 /* Private defines -----------------------------------------------------------*/
+
+/* -------------------------- TOOLS --------------------------- */
 #define PAR_SET_BIT(REG, BIT)     ((REG) |= (BIT))       /* 置位寄存器中指定的位         */
 #define PAR_CLEAR_BIT(REG, BIT)   ((REG) &= ~(BIT))      /* 清除寄存器中指定的位         */
 #define PAR_READ_BIT(REG, BIT)    ((REG) & (BIT))        /* 读取寄存器中指定位的状态     */
@@ -32,6 +34,7 @@
 /*按照大端序（Big-Endian）取值：低地址存高字节 */
 #define GET_BIGPU16_DATA(x)       (unsigned short)((*(x)<<8) + (*(x+1)))        /* 字节数组转大端16位无符号整数 */
 #define GET_BIGPU32_DATA(x)       (unsigned long)((*(x)<<24) + (*(x+1)<<16) + (*(x+2)<<8) + (*(x+3)))  /* 字节数组转大端32位无符号整数 */
+/* ------------------------------------------------------------ */
 
 /* paramters ------------------------------------------------------*/
 #define FLASH_ONEPAGE_HALFWORDSIZE  1024 //1024 half-word(16-bit) = 2048 byte(8-bit) Flash 的擦除操作是按页（2KB）为最小单位的
@@ -45,9 +48,16 @@ typedef union
     uint16_t flash_buff[FLASH_ONEPAGE_HALFWORDSIZE];  //size: 1024 half-word(16-bit)
     struct
     {
-        uint32_t Module_Reg32_reserve[100];           //(D1025)04 01  预留32位模组寄存器
+        uint32_t Prod_Protocol;                       //(D1025)04 01  产品通讯协议
+        uint32_t Module_Reg32_reserve[99];            //(D1025)04 03  预留32位模组寄存器
 
-        uint16_t Module_Reg16_reserve[500];           //(D1225)04 C9  预留16位模组寄存器 
+        uint16_t localUDPPort;                        //(D1225)04 C9  本机UDP端口
+        uint16_t s0LocalPort;                         //(D1226)04 CA  S0本机端口
+        uint16_t s0TargetPort;                        //(D1227)04 CB  S0目标端口
+        uint16_t s1LocalPort;                         //(D1228)04 CC  S1本机端口
+        uint16_t s1TargetPort;                        //(D1229)04 CD  S1目标端口（服务器 端口）
+        uint16_t mqttPublishInterval;                 //(D1230)04 CE  MQTT上传时间间隔（单位：分钟）
+        uint16_t Module_Reg16_reserve[494];           //(D1231)04 CF  预留16位模组寄存器 
 
         uint8_t idInfo[24];                           //(D1725)06 BD  ID序列号
         uint8_t macAddr[6];                           //(D1737)06 C9  本机MAC地址
@@ -74,7 +84,8 @@ typedef union
     uint16_t param_buff[PARAM_HALFWORDSIZE];         //size: 400 half-word(16-bit)
     struct
     {
-        uint32_t Module_Reg32_reserve[25];           //(D2049)08 01  预留32位模组寄存器
+        uint32_t SecCnt;                             //(D2049)08 01  运行的秒数
+        uint32_t Module_Reg32_reserve[24];           //预留32位模组寄存器
 
         uint16_t NetLink_State;                      //(D2099)08 33  网络连接状态
         uint16_t Module_Reg16_reserve[99];           //(D2100)08 34  预留16位模组寄存器 
@@ -89,6 +100,6 @@ extern flash_param_t gFlashParam;
 extern volatile param_t gParam;
 
 /* Exported functions prototypes ---------------------------------------------*/
-
+void Parameter_Init(void);
 
 #endif
