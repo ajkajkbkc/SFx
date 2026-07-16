@@ -184,6 +184,9 @@
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>0</RvdsVP>
+            <RvdsMve>0</RvdsMve>
+            <RvdsCdeCp>0</RvdsCdeCp>
+            <nBranchProt>0</nBranchProt>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
@@ -350,7 +353,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
-            <uClangAs>0</uClangAs>
+            <ClangAsOpt>4</ClangAsOpt>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -1432,16 +1435,6 @@
               <FilePath>..\Func\ntc.h</FilePath>
             </File>
             <File>
-              <FileName>W5500Task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Func\W5500Task.c</FilePath>
-            </File>
-            <File>
-              <FileName>W5500Task.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Func\W5500Task.h</FilePath>
-            </File>
-            <File>
               <FileName>parameter.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Func\parameter.c</FilePath>
@@ -1450,6 +1443,16 @@
               <FileName>parameter.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Func\parameter.h</FilePath>
+            </File>
+            <File>
+              <FileName>collect.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Func\collect.c</FilePath>
+            </File>
+            <File>
+              <FileName>collect.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Func\collect.h</FilePath>
             </File>
             <File>
               <FileName>mqtt.c</FileName>
@@ -1462,14 +1465,24 @@
               <FilePath>..\Func\mqtt.h</FilePath>
             </File>
             <File>
-              <FileName>collect.c</FileName>
+              <FileName>W5500Task.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Func\collect.c</FilePath>
+              <FilePath>..\Func\W5500Task.c</FilePath>
             </File>
             <File>
-              <FileName>collect.h</FileName>
+              <FileName>W5500Task.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\Func\collect.h</FilePath>
+              <FilePath>..\Func\W5500Task.h</FilePath>
+            </File>
+            <File>
+              <FileName>EC20Task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Func\EC20Task.c</FilePath>
+            </File>
+            <File>
+              <FileName>EC20Task.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Func\EC20Task.h</FilePath>
             </File>
           </Files>
         </Group>

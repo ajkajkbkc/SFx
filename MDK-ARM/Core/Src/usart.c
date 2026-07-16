@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
+#include "EC20Task.h"      /* 转发USART2数据给EC20任务 */
 
 /* USER CODE BEGIN 0 */
 volatile bsp_uart_status_info_st gtv_UartPortStatus[MAX_SUPPORT_UART_PORT];
@@ -499,6 +500,8 @@ void HandleUART1RecvData(unsigned char *lcp_Buff, unsigned short lsv_Length)
   */
 void HandleUART2RecvData(unsigned char *lcp_Buff, unsigned short lsv_Length)
 {
+    /* USART2连接EC20模块，转发数据给EC20任务处理 */
+    EC20_UART_RxCallback(lcp_Buff, lsv_Length);
 }
 
 /**

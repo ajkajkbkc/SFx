@@ -237,7 +237,7 @@ void osThreadNew_mqttTask(void)
 void Mqtt_TrsmNormalTask(void)
 {
     static uint32_t TrsmItvSecCnt = 0;
-    uint8_t ret;
+    // uint8_t ret;
 
     //不是第一次并且没到时间发送
     if( (TrsmItvSecCnt != 0) && (gParam.st.SecCnt - TrsmItvSecCnt < gFlashParam.st.mqttPublishInterval * 60) )
@@ -252,7 +252,7 @@ void Mqtt_TrsmNormalTask(void)
     LOGW("mqtt", "Start to mqtt normal transmit !!!!!!!!!!!!\r\n");
     char *payload = (char *)pvPortMalloc(1024);
     char *topic = (char *)pvPortMalloc(128);
-    int payloadlen = 0;
+    // int payloadlen = 0;
 
     gPyldRtu_Idx = 0;
     gPyldP_Idx = 0;
@@ -261,44 +261,44 @@ void Mqtt_TrsmNormalTask(void)
     memset(topic, 0, 128);
     memcpy(topic, gFlashParam.st.mqttPub, 100);
 
-    for(;;)
-    {
-        memset(payload, 0, 1024);
+    // for(;;)
+    // {
+    //     memset(payload, 0, 1024);
 
-        if(gPyldP_Idx == gCtrlP_Num)  //payload结束
-        {
-            break ;
-        }
+    //     if(gPyldP_Idx == gCtrlP_Num)  //payload结束
+    //     {
+    //         break ;
+    //     }
 
-        GetOnePayload(payload);
-        payloadlen = strlen(payload);
-        LOGD("mqtt_TrsmNomal", "Publish Topic  : %s", topic);
-        LOGI("mqtt_TrsmNomal", "Publish Payload: %s", payload);
+    //     GetOnePayload(payload);
+    //     payloadlen = strlen(payload);
+    //     LOGD("mqtt_TrsmNomal", "Publish Topic  : %s", topic);
+    //     LOGI("mqtt_TrsmNomal", "Publish Payload: %s", payload);
 
-        ret = Mqtt_Transmit(topic, payload, payloadlen);
-        if(ret == MQTT_SEND_OK)
-        {
-            gPyldP_Idx++;
-            gPyldOneP_Idx++;
-            if(gPyldOneP_Idx == CtrlPNum_Table[gRtu_InfoPacket.Rtu_Info[gPyldRtu_Idx].RtuType])
-            {
-                gPyldRtu_Idx++;
-                gPyldOneP_Idx = 0;
-            }
-        }
-        else
-        {
-            if(ret == MQTT_SEND_ERROVER)
-            {
-                TrsmItvSecCnt = 0;
-                break ;
-            }
-            else if(ret == MQTT_SEND_ERR)
-            {
-                continue;
-            }
-        }
-    }
+    //     ret = Mqtt_Transmit(topic, payload, payloadlen);
+    //     if(ret == MQTT_SEND_OK)
+    //     {
+    //         gPyldP_Idx++;
+    //         gPyldOneP_Idx++;
+    //         if(gPyldOneP_Idx == CtrlPNum_Table[gRtu_InfoPacket.Rtu_Info[gPyldRtu_Idx].RtuType])
+    //         {
+    //             gPyldRtu_Idx++;
+    //             gPyldOneP_Idx = 0;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         if(ret == MQTT_SEND_ERROVER)
+    //         {
+    //             TrsmItvSecCnt = 0;
+    //             break ;
+    //         }
+    //         else if(ret == MQTT_SEND_ERR)
+    //         {
+    //             continue;
+    //         }
+    //     }
+    // }
 
     vPortFree(topic);
     vPortFree(payload);

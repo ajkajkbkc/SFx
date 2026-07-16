@@ -1,5 +1,5 @@
-#ifndef _COLLECT_H
-#define _COLLECT_H
+#ifndef _EC20TASK_H
+#define _EC20TASK_H
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -10,11 +10,11 @@
 /* Exported types ------------------------------------------------------------*/
 
 /* Exported macro ------------------------------------------------------------*/
-extern osThreadId_t collectTaskHandle;
-extern const osThreadAttr_t collectTask_attributes;
+extern osThreadId_t EC20TaskHandle;
+extern const osThreadAttr_t EC20Task_attributes;
 
 /* Exported functions prototypes ---------------------------------------------*/
-void collectTask(void *argument);
+void EC20Task(void *argument);
+void EC20_UART_RxCallback(uint8_t *pData, uint16_t len);
 
-
-#endif // _COLLECT_H
+#endif //_EC20TASK_H

@@ -34,6 +34,7 @@
 #include "log.h"
 #include "iwdg.h"
 #include "rtc.h"
+#include "collect.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -120,6 +121,7 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_THREADS */
   ntcTaskHandle = osThreadNew(NtcTask, NULL, &ntcTask_attributes);
   W5500TaskHandle = osThreadNew(W5500Task, NULL, &W5500Task_attributes);
+  collectTaskHandle = osThreadNew(collectTask, NULL, &collectTask_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
