@@ -19,7 +19,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
-#include "EC20Task.h"      /* 转发USART2数据给EC20任务 */
 
 /* USER CODE BEGIN 0 */
 volatile bsp_uart_status_info_st gtv_UartPortStatus[MAX_SUPPORT_UART_PORT];
